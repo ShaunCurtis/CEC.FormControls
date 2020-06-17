@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30204.135
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CEC.FormControls", "CEC.FormControls\CEC.FormControls.csproj", "{B96AABE8-8126-4BC2-8AD6-D19DF15DE363}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B96AABE8-8126-4BC2-8AD6-D19DF15DE363}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B96AABE8-8126-4BC2-8AD6-D19DF15DE363}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B96AABE8-8126-4BC2-8AD6-D19DF15DE363}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B96AABE8-8126-4BC2-8AD6-D19DF15DE363}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {EF710848-50A9-48DD-BF5C-2CDE51695CF7}
+	EndGlobalSection
+EndGlobal
