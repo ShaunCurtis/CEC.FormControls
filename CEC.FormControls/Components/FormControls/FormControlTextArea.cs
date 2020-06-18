@@ -18,7 +18,8 @@ namespace CEC.FormControls.Components.FormControls
             builder.AddMultipleAttributes(1, AdditionalAttributes);
             builder.AddAttribute(2, "class", CssClass);
             builder.AddAttribute(3, "value", BindConverter.FormatValue(CurrentValue));
-            builder.AddAttribute(4, "tabindex", TabIndex.ToString());
+            builder.AddAttribute(4, "onchange", EventCallback.Factory.CreateBinder<string>(this, __value => CurrentValueAsString = __value, CurrentValueAsString));
+            builder.AddAttribute(5, "tabindex", TabIndex.ToString());
             builder.CloseElement();
         }
         /// <inheritdoc />

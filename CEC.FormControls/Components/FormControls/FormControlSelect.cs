@@ -7,7 +7,7 @@ using System.Text;
 
 namespace CEC.FormControls.Components.FormControls
 {
-    class FormControlSelect<TValue> : FormRecordControlBase<TValue>
+    public class FormControlSelect<TValue> : FormRecordControlBase<TValue>
     {
         /// <summary>
         /// Gets or sets the child content to be rendering inside the select element.

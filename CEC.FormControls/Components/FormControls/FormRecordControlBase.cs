@@ -32,15 +32,8 @@ namespace CEC.FormControls.Components.FormControls
         public TValue RecordValue { get; set; }
 
         /// <summary>
-        /// Gets or sets whether the Original value functionality is used.
-        /// If set to false the behaviour reverts to the base class
-        /// </summary>
-        [Parameter]
-        public bool UseRecordValue { get; set; }
-
-        /// <summary>
         /// Gets or Sets a callback that signals if the change to the current value matches the Original Value
-        /// If  UseOriginalValue set to false will be called when the value changes - i.e. reflect ValueChanged
+        /// If _UseOriginalValue is false will be called when the value changes - i.e. reflect ValueChanged
         /// </summary>
         [Parameter]
         public EventCallback<bool> ChangedFromRecord { get; set; }
@@ -52,6 +45,11 @@ namespace CEC.FormControls.Components.FormControls
         [Parameter]
         public bool Locked { get; set; }
 
+        /// <summary>
+        /// Boolean Property that checks if a RecordValue exists and is therefore enabled
+        /// </summary>
+        private bool _UseRecordValue => RecordValue != null;
+
 
         /// <summary>
         /// Hides the base class CurrentValue.  If UseOriginalValue is not set the property calls the base class setter
@@ -62,7 +60,7 @@ namespace CEC.FormControls.Components.FormControls
             get => Value;
             set
             {
-                if (!this.UseRecordValue)
+                if (!this._UseRecordValue)
                 {
                     var hasChanged = !EqualityComparer<TValue>.Default.Equals(value, Value);
                     if (hasChanged)

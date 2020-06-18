@@ -4,7 +4,7 @@ using System;
 
 namespace CEC.FormControls.Components.FormControls
 {
-    class FormControlCheckBox : FormRecordControlBase<bool>
+    public class FormControlCheckBox : FormRecordControlBase<bool>
     {
         /// <inheritdoc />
         protected override void BuildRenderTree(RenderTreeBuilder builder)
