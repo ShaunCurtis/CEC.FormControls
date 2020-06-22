@@ -39,6 +39,15 @@ namespace CEC.FormControls.Components.FormControls
         public EventCallback<bool> ChangedFromRecord { get; set; }
 
         /// <summary>
+        /// A Cascaded callback that signals if the change to the current value matches the Original Value
+        /// Same as ChangedFromRecord but cascaded rather than set individually
+        /// A callback that signals if the change to the current value matches the Original Value
+        /// If _UseOriginalValue is false will be called when the value changes - i.e. reflect ValueChanged
+        /// </summary>
+        [CascadingParameter(Name = "OnRecordChange")]
+        protected Action<bool> OnRecordChange { get; set; }
+
+        /// <summary>
         /// Is used on some controls to change the way the control is displayed
         /// like readonly but allows greater flexibility
         /// </summary>
@@ -49,7 +58,6 @@ namespace CEC.FormControls.Components.FormControls
         /// Boolean Property that checks if a RecordValue exists and is therefore enabled
         /// </summary>
         private bool _UseRecordValue => RecordValue != null;
-
 
         /// <summary>
         /// Hides the base class CurrentValue.  If UseOriginalValue is not set the property calls the base class setter
@@ -67,7 +75,8 @@ namespace CEC.FormControls.Components.FormControls
                     {
                         Value = value;
                         _ = ValueChanged.InvokeAsync(value);
-                        _ = this.ChangedFromRecord.InvokeAsync(true);
+                        _ = this.ChangedFromRecord.InvokeAsync(this.EditContext.IsModified());
+                        this.OnRecordChange?.Invoke(this.EditContext.IsModified());
                         EditContext.NotifyFieldChanged(FieldIdentifier);
                     }
                 }
@@ -82,12 +91,14 @@ namespace CEC.FormControls.Components.FormControls
                         if (originalHasChanged)
                         {
                             this.EditContext.NotifyFieldChanged(FieldIdentifier);
+                            this.OnRecordChange?.Invoke(this.EditContext.IsModified());
                             _ = this.ChangedFromRecord.InvokeAsync(true);
                         }
                         else
                         {
                             this.EditContext.MarkAsUnmodified(this.FieldIdentifier);
-                            _ = this.ChangedFromRecord.InvokeAsync(false);
+                            this.OnRecordChange?.Invoke(this.EditContext.IsModified());
+                            _ = this.ChangedFromRecord.InvokeAsync(this.EditContext.IsModified());
                         }
                     }
                 }

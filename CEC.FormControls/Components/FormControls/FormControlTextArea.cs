@@ -17,9 +17,9 @@ namespace CEC.FormControls.Components.FormControls
             builder.OpenElement(0, "textarea");
             builder.AddMultipleAttributes(1, AdditionalAttributes);
             builder.AddAttribute(2, "class", CssClass);
-            builder.AddAttribute(3, "value", BindConverter.FormatValue(CurrentValue));
             builder.AddAttribute(4, "onchange", EventCallback.Factory.CreateBinder<string>(this, __value => CurrentValueAsString = __value, CurrentValueAsString));
             builder.AddAttribute(5, "tabindex", TabIndex.ToString());
+            builder.AddMarkupContent(6, BindConverter.FormatValue(CurrentValue));
             builder.CloseElement();
         }
         /// <inheritdoc />

@@ -69,5 +69,21 @@ namespace CEC.FormControlsSample.Components
             this.StateHasChanged();
         }
 
+        /// <summary>
+        /// Event handler for the RecordFromControls FieldChanged Event
+        /// </summary>
+        /// <param name="changestate"></param>
+        protected virtual void RecordFieldChanged(bool changestate)
+        {
+            //if (this.EditContext != null)
+            //{
+            //    this.ExitAttempt = false;
+            //    this.IsClean = !this.EditContext.IsModified();
+            //    if (this.IsClean) this.Alert.ClearAlert();
+            //    else this.Alert.SetAlert("The Weather has changed!", Alert.AlertWarning);
+            //}
+        }
+
+
     }
 }

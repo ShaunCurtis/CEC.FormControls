@@ -24,7 +24,7 @@ namespace CEC.FormControlsSample.Pages
             this.EditContext = new EditContext(this.Record);
 
             // Register with the Edit Context OnFieldChanged Event
-            //this.EditContext.OnFieldChanged += OnFieldChanged;
+            this.EditContext.OnFieldChanged += OnFieldChanged;
 
             // Make a copy of the existing record - in this case it's always new but in the real world that won't be the case
             this.ShadowRecord = this.Record.Copy();
@@ -46,14 +46,6 @@ namespace CEC.FormControlsSample.Pages
             // Check the EditContext State and set the ISClean Property accordingly
             this.IsClean = !this.EditContext.IsModified();
             // opens the Alert if the record is dirty
-            if (this.IsClean) this.Alert.ClearAlert();
-            else this.Alert.SetAlert("The Forecast Has Changed", Alert.AlertWarning);
-        }
-
-        protected void RecordFieldChanged(bool changestate)
-        {
-            this.ExitAttempt = false;
-            this.IsClean = !changestate;
             if (this.IsClean) this.Alert.ClearAlert();
             else this.Alert.SetAlert("The Forecast Has Changed", Alert.AlertWarning);
         }

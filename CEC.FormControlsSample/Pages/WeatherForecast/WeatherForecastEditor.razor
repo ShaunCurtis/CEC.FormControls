@@ -9,82 +9,84 @@
     <div class="card-body pb-0">
         <div class="container-fluid">
             <EditForm EditContext="this.EditContext">
+                <CascadingValue Value="@this.RecordFieldChanged" Name="OnRecordChange" TValue="Action<bool>">
 
-                <div class="form-group row">
-                    <label class="col-4 col-form-label">
-                        Record Date
-                    </label>
-                    <div class="col-4">
-                        <FormControlDate class="form-control" @bind-Value="this.Record.Date" RecordValue="this.ShadowRecord.Date" ChangedFromRecord="this.RecordFieldChanged"></FormControlDate>
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <label class="col-4 col-form-label">
-                        Temperature &deg; C
-                    </label>
-                    <div class="col-2">
-                        <FormControlNumber class="form-control" @bind-Value="this.Record.TemperatureC" RecordValue="this.ShadowRecord.TemperatureC" ChangedFromRecord="this.RecordFieldChanged"></FormControlNumber>
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <label class="col-4 col-form-label">
-                        Description
-                    </label>
-                    <div class="col-8">
-                        <FormControlText class="form-control" @bind-Value="this.Record.Description" RecordValue="@this.ShadowRecord.Description" ChangedFromRecord="this.RecordFieldChanged"></FormControlText>
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <label class="col-4 col-form-label">
-                        Frost?
-                    </label>
-                    <div class="col-2">
-                        <div class="form-check">
-                            <FormControlCheckBox class="form-check-input position-static" @bind-Value="this.Record.Frost" RecordValue="@this.ShadowRecord.Frost" ChangedFromRecord="this.RecordFieldChanged"></FormControlCheckBox>
+                    <div class="form-group row">
+                        <label class="col-4 col-form-label">
+                            Record Date
+                        </label>
+                        <div class="col-4">
+                            <FormControlDate class="form-control" @bind-Value="this.Record.Date" RecordValue="this.ShadowRecord.Date"></FormControlDate>
                         </div>
                     </div>
-                </div>
-                <div class="form-group row">
-                    <label class="col-4 col-form-label">
-                        Outlook
-                    </label>
-                    <div class="col-8">
-                        <FormControlSelect class="form-control" @bind-Value="this.Record.Outlook" RecordValue="@this.ShadowRecord.Outlook" ChangedFromRecord="this.RecordFieldChanged">
-                            @foreach (var outlook in Enum.GetValues(typeof(CEC.FormControlsSample.Data.WeatherForecast.OutlookType)))
+                    <div class="form-group row">
+                        <label class="col-4 col-form-label">
+                            Temperature &deg; C
+                        </label>
+                        <div class="col-2">
+                            <FormControlNumber class="form-control" @bind-Value="this.Record.TemperatureC" RecordValue="this.ShadowRecord.TemperatureC"></FormControlNumber>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-4 col-form-label">
+                            Description
+                        </label>
+                        <div class="col-8">
+                            <FormControlText class="form-control" @bind-Value="this.Record.Description" RecordValue="@this.ShadowRecord.Description"></FormControlText>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-4 col-form-label">
+                            Frost?
+                        </label>
+                        <div class="col-2">
+                            <div class="form-check">
+                                <FormControlCheckBox class="form-check-input position-static" @bind-Value="this.Record.Frost" RecordValue="@this.ShadowRecord.Frost"></FormControlCheckBox>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-4 col-form-label">
+                            Outlook
+                        </label>
+                        <div class="col-8">
+                            <FormControlSelect class="form-control" @bind-Value="this.Record.Outlook" RecordValue="@this.ShadowRecord.Outlook">
+                                @foreach (var outlook in Enum.GetValues(typeof(CEC.FormControlsSample.Data.WeatherForecast.OutlookType)))
                             {
                                 <option value="@outlook">@outlook</option>
                             }
-                        </FormControlSelect>
+                            </FormControlSelect>
+                        </div>
                     </div>
-                </div>
-                <div class="form-group row">
-                    <label class="col-4 col-form-label">
-                        Summary
-                    </label>
-                    <div class="col-8">
-                        <FormControlTextArea class="form-control" rows="6" @bind-Value="this.Record.Summary" RecordValue="@this.ShadowRecord.Summary" ChangedFromRecord="this.RecordFieldChanged"></FormControlTextArea>
+                    <div class="form-group row">
+                        <label class="col-4 col-form-label">
+                            Summary
+                        </label>
+                        <div class="col-8">
+                            <FormControlTextArea class="form-control" rows="6" @bind-Value="this.Record.Summary" RecordValue="@this.ShadowRecord.Summary"></FormControlTextArea>
+                        </div>
                     </div>
-                </div>
-                <div class="row">
-                    <div class="col-8">
-                        <UIAlert Alert="this.Alert"></UIAlert>
-                    </div>
-                    <div class="col-4 text-right pb-3">
-                        @if (this.ExitAttempt)
+                    <div class="row">
+                        <div class="col-8">
+                            <UIAlert Alert="this.Alert"></UIAlert>
+                        </div>
+                        <div class="col-4 text-right pb-3">
+                            @if (this.ExitAttempt)
                         {
                             <button type="button" class="btn btn-warning" @onclick="this.Cancel">Cancel</button>
                             <button type="button" class="btn btn-danger" @onclick="this.ConfirmExit">Exit Without Save</button>
                         }
-                        @if (!this.IsClean)
+                            @if (!this.IsClean)
                         {
                             <button type="button" class="btn btn-success" @onclick="this.Save">Save</button>
                         }
-                        @if (this.IsClean)
+                            @if (this.IsClean)
                         {
                             <button type="button" class="btn btn-primary" @onclick="this.ConfirmExit">Exit</button>
                         }
+                        </div>
                     </div>
-                </div>
+                </CascadingValue>
             </EditForm>
         </div>
     </div>
