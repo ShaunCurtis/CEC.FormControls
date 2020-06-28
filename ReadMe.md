@@ -49,3 +49,6 @@ The code snippet below shows the date control in use:
 The example project demonstrates the controls in action on a WeatherForecast record.  The project also ties the controls into the CEC.Routing library to demonstrate enhanced router navigation control when the editor page is not saved.
 
 You can read more about CEC.Routing here https://github.com/ShaunCurtis/CEC.Routing/
+
+Updates:
+1.0.1 - https://github.com/ShaunCurtis/CEC.FormControls/wiki/1.0.1-Updates
