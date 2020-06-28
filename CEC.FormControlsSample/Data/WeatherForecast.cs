@@ -5,7 +5,7 @@ namespace CEC.FormControlsSample.Data
     public class WeatherForecast
     {
 
-        public DateTime Date { get; set; } = DateTime.Now;
+        public DateTime Date { get; set; } = DateTime.Now.Date;
 
         public int TemperatureC { get; set; } = 20;
 

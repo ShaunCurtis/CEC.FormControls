@@ -3,8 +3,6 @@ using CEC.Routing.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace CEC.FormControlsSample.Components
@@ -73,15 +71,15 @@ namespace CEC.FormControlsSample.Components
         /// Event handler for the RecordFromControls FieldChanged Event
         /// </summary>
         /// <param name="changestate"></param>
-        protected virtual void RecordFieldChanged(bool changestate)
+        protected virtual void RecordFieldChanged(bool changeState)
         {
-            //if (this.EditContext != null)
-            //{
-            //    this.ExitAttempt = false;
-            //    this.IsClean = !this.EditContext.IsModified();
-            //    if (this.IsClean) this.Alert.ClearAlert();
-            //    else this.Alert.SetAlert("The Weather has changed!", Alert.AlertWarning);
-            //}
+            if (this.EditContext != null)
+            {
+                this.ExitAttempt = false;
+                this.IsClean = !changeState;
+                    if (this.IsClean) this.Alert.ClearAlert();
+                else this.Alert.SetAlert("The Weather has changed!", Alert.AlertWarning);
+            }
         }
 
 

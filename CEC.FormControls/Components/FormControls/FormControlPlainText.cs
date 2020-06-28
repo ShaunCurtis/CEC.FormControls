@@ -15,12 +15,19 @@ namespace CEC.FormControls.Components.FormControls
         [Parameter]
         public string Value { get; set; }
 
+        /// <summary>
+        /// The string value that will be displayed
+        /// </summary>
+        [Parameter]
+        public bool AsMarkup { get; set; } = true;
+
         protected override void BuildRenderTree(RenderTreeBuilder builder)
         {
             builder.OpenElement(0, "input");
             builder.AddAttribute(2, "class", "form-control-plaintext");
             builder.AddAttribute(2, "readonly", "readonly");
-            builder.AddAttribute(4, "value", this.Value);
+            if (AsMarkup) builder.AddAttribute(4, "value", (MarkupString)this.Value);
+            else builder.AddAttribute(4, "value", this.Value);
             builder.CloseElement();
         }
     }

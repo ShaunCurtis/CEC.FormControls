@@ -23,9 +23,6 @@ namespace CEC.FormControlsSample.Pages
             // Set up the Edit Context
             this.EditContext = new EditContext(this.Record);
 
-            // Register with the Edit Context OnFieldChanged Event
-            this.EditContext.OnFieldChanged += OnFieldChanged;
-
             // Make a copy of the existing record - in this case it's always new but in the real world that won't be the case
             this.ShadowRecord = this.Record.Copy();
 
@@ -33,21 +30,6 @@ namespace CEC.FormControlsSample.Pages
             this.PageUrl = this.NavManager.Uri;
 
             return base.OnInitializedAsync();
-        }
-
-        /// <summary>
-        /// Event handler for when a edit form field change takes place
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        protected void OnFieldChanged(object sender, EventArgs e)
-        {
-            this.ExitAttempt = false;
-            // Check the EditContext State and set the ISClean Property accordingly
-            this.IsClean = !this.EditContext.IsModified();
-            // opens the Alert if the record is dirty
-            if (this.IsClean) this.Alert.ClearAlert();
-            else this.Alert.SetAlert("The Forecast Has Changed", Alert.AlertWarning);
         }
 
         /// <summary>
@@ -83,7 +65,8 @@ namespace CEC.FormControlsSample.Pages
         {
             // To escape a dirty component set IsClean manually and navigate.
             this.IsClean = true;
-            this.NavManager.NavigateTo("/Index");
+            if (!string.IsNullOrEmpty(this.RouterSessionService.NavigationCancelledUrl)) this.NavManager.NavigateTo(this.RouterSessionService.NavigationCancelledUrl);
+            else this.NavManager.NavigateTo("/");
         }
 
     }
