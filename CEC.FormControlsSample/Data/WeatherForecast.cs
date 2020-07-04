@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.SignalR;
 using System;
 
 namespace CEC.FormControlsSample.Data
 {
-    public class WeatherForecast
+    public class WeatherForecast : IDbRecord<WeatherForecast>
     {
+        public int ID { get; set; }
 
         public DateTime Date { get; set; } = DateTime.Now.Date;
 
@@ -26,7 +28,7 @@ namespace CEC.FormControlsSample.Data
             Cloudy = 3
         }
 
-        public WeatherForecast Copy()
+        public WeatherForecast ShadowCopy()
         {
             return new WeatherForecast() {
                 Date = this.Date,
