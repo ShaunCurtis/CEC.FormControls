@@ -4,6 +4,8 @@ using CEC.Routing.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using System;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace CEC.FormControlsSample.Components
@@ -131,14 +133,19 @@ namespace CEC.FormControlsSample.Components
         /// </summary>
         protected virtual void Save()
         {
-            // Set the Shadow Copy to a copy of the current record
-            // Normally run a Save/Create CRUD operation here
-            this.ShadowRecord = this.Record.ShadowCopy();
-            // Set the EditContext State
-            this.EditContext.MarkAsUnmodified();
-            this.CheckClean(true);
-            this.Alert.SetAlert(this.SavedMessage, Alert.AlertSuccess);
-            InvokeAsync(this.StateHasChanged);
+            if (this.EditContext.Validate())
+            {
+
+                // Set the Shadow Copy to a copy of the current record
+                // Normally run a Save/Create CRUD operation here
+                this.ShadowRecord = this.Record.ShadowCopy();
+                // Set the EditContext State
+                this.EditContext.MarkAsUnmodified();
+                this.CheckClean(true);
+                this.Alert.SetAlert(this.SavedMessage, Alert.AlertSuccess);
+                InvokeAsync(this.StateHasChanged);
+            }
+            else this.Alert.SetAlert("A validation error occurred.  Check individual fields for the relevant error.", Alert.AlertDanger);
         }
 
         /// <summary>

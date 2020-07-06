@@ -68,39 +68,20 @@ namespace CEC.FormControls.Components.FormControls
             get => Value;
             set
             {
-                if (!this._UseRecordValue)
+                var hasChanged = !EqualityComparer<TValue>.Default.Equals(value, Value);
+                // only returns true if we have an original value and it matches the current value
+                var isSameAsOriginal = this._UseRecordValue && EqualityComparer<TValue>.Default.Equals(value, this.RecordValue);
+                if (hasChanged)
                 {
-                    var hasChanged = !EqualityComparer<TValue>.Default.Equals(value, Value);
-                    if (hasChanged)
-                    {
-                        Value = value;
-                        _ = ValueChanged.InvokeAsync(value);
-                        _ = this.ChangedFromRecord.InvokeAsync(this.EditContext.IsModified());
-                        this.OnRecordChange?.Invoke(this.EditContext.IsModified());
-                        EditContext.NotifyFieldChanged(FieldIdentifier);
-                    }
-                }
-                else
-                {
-                    var hasChanged = !EqualityComparer<TValue>.Default.Equals(value, Value);
-                    if (hasChanged)
-                    {
-                        Value = value;
-                        _ = ValueChanged.InvokeAsync(value);
-                        var originalHasChanged = !EqualityComparer<TValue>.Default.Equals(this.Value, this.RecordValue);
-                        if (originalHasChanged)
-                        {
-                            this.EditContext.NotifyFieldChanged(FieldIdentifier);
-                            this.OnRecordChange?.Invoke(this.EditContext.IsModified());
-                            _ = this.ChangedFromRecord.InvokeAsync(true);
-                        }
-                        else
-                        {
-                            this.EditContext.MarkAsUnmodified(this.FieldIdentifier);
-                            this.OnRecordChange?.Invoke(this.EditContext.IsModified());
-                            _ = this.ChangedFromRecord.InvokeAsync(this.EditContext.IsModified());
-                        }
-                    }
+                    Value = value;
+                    // if the value is the same as the orginal we set the field to unmodified
+                    // otherwise we notify the edit context of the change
+                    if (isSameAsOriginal) this.EditContext.MarkAsUnmodified(this.FieldIdentifier);
+                    else EditContext.NotifyFieldChanged(FieldIdentifier);
+                    // kick off the events
+                    _ = ValueChanged.InvokeAsync(value);
+                    _ = this.ChangedFromRecord.InvokeAsync(this.EditContext.IsModified());
+                    this.OnRecordChange?.Invoke(this.EditContext.IsModified());
                 }
             }
         }

@@ -1,5 +1,5 @@
-using Microsoft.AspNetCore.SignalR;
 using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace CEC.FormControlsSample.Data
 {
@@ -7,8 +7,11 @@ namespace CEC.FormControlsSample.Data
     {
         public int ID { get; set; }
 
+        [Required]
         public DateTime Date { get; set; } = DateTime.Now.Date;
 
+        [Required]
+        [Range(-40, 60, ErrorMessage ="Only Temperatures between -40 an 60 are allowed.")]
         public int TemperatureC { get; set; } = 20;
 
         public bool Frost { get; set; }

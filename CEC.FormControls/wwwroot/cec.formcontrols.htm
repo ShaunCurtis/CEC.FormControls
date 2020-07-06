@@ -1,0 +1,578 @@
+<html>
+
+<head>
+	<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+	<meta name=Generator content="Microsoft Word 15 (filtered)">
+	<link rel="stylesheet" href="help.css" />
+
+</head>
+
+<body lang=EN-GB link=blue vlink="#877589">
+
+<div class=WordSection1>
+
+<p class=MsoTitle>CEC.FormControls</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>The standard form controls based on InputBase&lt;T&gt; don’t
+track changes against an existing record such as a model class.  The controls
+compare the entered value against the value in the control.  If its different
+they update the stored value and tells the EditContext.  All ok, as long as you
+don’t change a value twice.  At this point the control only knows what the last
+entered value was.  You could change it back to the original and the
+EditContext would still report the form as modified.  This article shows how to
+overcome this issue.</p>
+
+<h1>Example and Library Repositories</h1>
+
+<p class=MsoNormal><b>CEC.FormControls</b> is my implementation of the standard
+Blazor Form Controls with added functionality to check the current value
+against a database value.&nbsp; It’s released and available as a Nuget Package.
+The source code is available at <a
+href="https://github.com/ShaunCurtis/CEC.FormControls">https://github.com/ShaunCurtis/CEC.FormControls</a>.</p>
+
+<p class=MsoListParagraph style='margin-left:0cm'>All the source code is
+available under the MIT license.</p>
+
+<h1>InputBase&lt;T&gt;</h1>
+
+<p class=MsoNormal>All the input controls inherit from InputBase&lt;T&gt;.   Diving
+into the code, the key section is the Property CurrentValue.  It’s here that
+the stored value is set to the current value and the IsModified decision made. 
+The property looks like this, unfortunately it protected and can’t be overridden.</p>
+
+<p class=CodeCxSpFirst><span style='color:black'>/// &lt;summary&gt;</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>/// Gets or sets the current
+value of the input.</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>/// &lt;/summary&gt;</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>protected TValue CurrentValue</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>{</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>    get =&gt; Value!;</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>    set</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>    {</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>        var hasChanged =
+!EqualityComparer&lt;TValue&gt;.Default.Equals(value, Value);</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>        if (hasChanged)</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>        {</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>            Value = value!;</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>            _ =
+ValueChanged.InvokeAsync(Value);</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>           
+EditContext.NotifyFieldChanged(FieldIdentifier);</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>        }</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>    }</span></p>
+
+<p class=CodeCxSpLast><span style='color:black'>}</span></p>
+
+<h2>Rebuild InputBase&lt;T&gt; </h2>
+
+<p class=MsoNormal>To make any future upgrades as simple as possible, the abstract
+InputBase&lt;T&gt; is replicated with one change:</p>
+
+<p class=CodeCxSpFirst><span style='color:black'>Protected virtual TValue
+CurrentValue</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>{</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>……..</span></p>
+
+<p class=CodeCxSpLast><span style='color:black'>}</span></p>
+
+<p class=MsoNormal>The new control is named <b><i>FormControlBase&lt;TValue&gt;.</i></b></p>
+
+<h2>New abstract class <b><i>FormRecordControlBase&lt;TValue&gt;</i></b></h2>
+
+<p class=MsoNormal>A new abstract class FormRecordContralBase is added to
+implement the extra functionality. </p>
+
+<p class=MsoNormal>Two parameters:</p>
+
+<p class=MsoListParagraphCxSpFirst style='margin-left:18.0pt;text-indent:-18.0pt'>1.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><i>RecordValue
+</i>- set to the database value – more about this later.</p>
+
+<p class=MsoListParagraphCxSpLast style='margin-left:18.0pt;text-indent:-18.0pt'>2.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><i>Locked</i>
+- I use to change the look of certain custom form controls.</p>
+
+<p class=CodeCxSpFirst><span style='color:black'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[</span><span
+style='color:#569CD6'>Parameter</span><span style='color:black'>] </span><span
+style='color:#569CD6'>public</span><span style='color:black'>&nbsp;</span><span
+style='color:#569CD6'>TValue</span><span style='color:black'>&nbsp;RecordValue&nbsp;{&nbsp;</span><span
+style='color:#569CD6'>get</span><span style='color:black'>;&nbsp;</span><span
+style='color:#569CD6'>set</span><span style='color:black'>;&nbsp;}</span></p>
+
+<p class=CodeCxSpLast><span style='color:black'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[</span><span
+style='color:#569CD6'>Parameter</span><span style='color:black'>] </span><span
+style='color:#569CD6'>public</span><span style='color:black'>&nbsp;</span><span
+style='color:#569CD6'>bool</span><span style='color:black'>&nbsp;Locked&nbsp;{&nbsp;</span><span
+style='color:#569CD6'>get</span><span style='color:black'>;&nbsp;</span><span
+style='color:#569CD6'>set</span><span style='color:black'>;&nbsp;}</span></p>
+
+<p class=MsoNormal>Two events:</p>
+
+<p class=MsoListParagraphCxSpFirst style='margin-left:18.0pt;text-indent:-18.0pt'>1.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><i>ChangedFromRecord
+</i>– used for individual assignment of a callback function.</p>
+
+<p class=MsoListParagraphCxSpLast style='margin-left:18.0pt;text-indent:-18.0pt'>2.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><i>OnRecordChange</i>
+– a cascaded Action from the parent component – more later.</p>
+
+<p class=CodeCxSpFirst><span style='color:black'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[</span><span
+style='color:#569CD6'>Parameter</span><span style='color:black'>] </span><span
+style='color:#569CD6'>public</span><span style='color:black'>&nbsp;</span><span
+style='color:#569CD6'>EventCallback</span><span style='color:black'>&lt;</span><span
+style='color:#569CD6'>bool</span><span style='color:black'>&gt;&nbsp;ChangedFromRecord&nbsp;{&nbsp;</span><span
+style='color:#569CD6'>get</span><span style='color:black'>;&nbsp;</span><span
+style='color:#569CD6'>set</span><span style='color:black'>;&nbsp;}</span></p>
+
+<p class=CodeCxSpLast><span style='color:black'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[</span><span
+style='color:#569CD6'>CascadingParameter</span><span style='color:black'>(Name&nbsp;=&nbsp;</span><span
+style='color:#CE9178'>&quot;OnRecordChange&quot;</span><span style='color:black'>)]
+</span><span style='color:#569CD6'>protected</span><span style='color:black'>&nbsp;</span><span
+style='color:#569CD6'>Action</span><span style='color:black'>&lt;</span><span
+style='color:#569CD6'>bool</span><span style='color:black'>&gt;&nbsp;OnRecordChange&nbsp;{&nbsp;</span><span
+style='color:#569CD6'>get</span><span style='color:black'>;&nbsp;</span><span
+style='color:#569CD6'>set</span><span style='color:black'>;&nbsp;}</span></p>
+
+<p class=MsoNormal>A private property -<i> _UseRecordValue</i> – that tests if <i>RecordValue</i>
+checking is required.</p>
+
+<p class="CodeCxSpLast CodeCxSpFirst"><span style='color:black'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span
+style='color:#569CD6'>private</span><span style='color:black'>&nbsp;</span><span
+style='color:#569CD6'>bool</span><span style='color:black'>&nbsp;_UseRecordValue&nbsp;=&gt;&nbsp;RecordValue&nbsp;!=&nbsp;</span><span
+style='color:#569CD6'>null</span><span style='color:black'>;</span></p>
+
+<p class=MsoNormal>Override <i>CurrentValue</i> setter.  The method now checks the
+new value against the RecordValue if one exists and sets the Field as
+unmodified in the EditContext.  Otherwise is acts just like the original.  It
+kicks off the two new events passing the IsModified status.</p>
+
+<p class=CodeCxSpFirst><span style='color:black'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;private&nbsp;bool&nbsp;_UseRecordValue&nbsp;=&gt;&nbsp;RecordValue&nbsp;!=&nbsp;null;</span></p>
+
+<p class=CodeCxSpMiddle>&nbsp;</p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;protected&nbsp;override&nbsp;TValue&nbsp;CurrentValue</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;get&nbsp;=&gt;&nbsp;Value;</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;set</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>                var
+hasChanged = !EqualityComparer&lt;TValue&gt;.Default.Equals(value, Value);</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>                // only
+returns true if we have an original value and it matches the current value</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>                var
+isSameAsOriginal = this._UseRecordValue &amp;&amp;
+EqualityComparer&lt;TValue&gt;.Default.Equals(value, this.RecordValue);</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>                if
+(hasChanged)</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>                {</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>                    Value =
+value;</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>                    // if the
+value is the same as the orginal we set the field to unmodified</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>                    //
+otherwise we notify the edit context of the change</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>                    if
+(isSameAsOriginal) this.EditContext.MarkAsUnmodified(this.FieldIdentifier);</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>                    else
+EditContext.NotifyFieldChanged(FieldIdentifier);</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>                    // kick
+off the events</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>                    _ =
+ValueChanged.InvokeAsync(value);</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>                    _ =
+this.ChangedFromRecord.InvokeAsync(this.EditContext.IsModified());</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>                   
+this.OnRecordChange?.Invoke(this.EditContext.IsModified());</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>                }&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</span></p>
+
+<p class=CodeCxSpLast><span style='color:black'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</span></p>
+
+<h2>Rename existing controls.</h2>
+
+<p class=MsoNormal>The final changes:</p>
+
+<p class=MsoListParagraphCxSpFirst style='margin-left:18.0pt;text-indent:-18.0pt'>1.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>Change
+the names and namespace on the copied standard controls – I’ve called them all <b><i>FormControlxxxxxxx</i></b>.</p>
+
+<p class=MsoListParagraphCxSpLast style='margin-left:18.0pt;text-indent:-18.0pt'>2.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>Change
+the inheritance to <b><i>FormRecordControlBase&lt;TValue&gt;</i></b></p>
+
+<h1>Implementing the Controls</h1>
+
+<p class=MsoNormal>There’s an example project with <b>CEC.FormControls</b>. 
+There are few things to note in this project:</p>
+
+<p class=MsoListParagraphCxSpFirst style='text-indent:-18.0pt'>1.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>CEC.Routing
+is used to control routing when the edit form is dirty i.e. tying into these
+controls.</p>
+
+<p class=MsoListParagraphCxSpLast style='text-indent:-18.0pt'>2.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>Record
+Edit form code is written in a boilerplate class – EditComponentBase. </p>
+
+<h6>WeatherForecast.cs</h6>
+
+<p class=MsoNormal>The WeatherForecast class implements a ShadowCopy of the
+original record (part of the IDbRecord interface).  This is a deep copy of the
+record class, and is only updated against the record when the record is saved. 
+The RecordValue of the control instance is linked to this.</p>
+
+<p class=CodeCxSpFirst><span style='color:black'>    public class
+WeatherForecast : IDbRecord&lt;WeatherForecast&gt;</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>    {</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>        public int ID { get;
+set; }</span></p>
+
+<p class=CodeCxSpMiddle>&nbsp;</p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>        [Required]</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>        public DateTime Date
+{ get; set; } = DateTime.Now.Date;</span></p>
+
+<p class=CodeCxSpMiddle>&nbsp;</p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>        [Required]</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>        [Range(-40, 60,
+ErrorMessage =&quot;Only Temperatures between -40 an 60 are allowed.&quot;)]</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>        public int
+TemperatureC { get; set; } = 20;</span></p>
+
+<p class=CodeCxSpMiddle>&nbsp;</p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>        public bool Frost {
+get; set; }</span></p>
+
+<p class=CodeCxSpMiddle>&nbsp;</p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>        public OutlookType
+Outlook { get; set; } = OutlookType.Sunny;</span></p>
+
+<p class=CodeCxSpMiddle>&nbsp;</p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>        public string
+Description { get; set; } = string.Empty;</span></p>
+
+<p class=CodeCxSpMiddle>&nbsp;</p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>        public string Summary
+{ get; set; } = string.Empty;</span></p>
+
+<p class=CodeCxSpMiddle>&nbsp;</p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>        public int
+TemperatureF =&gt; 32 + (int)(TemperatureC / 0.5556);</span></p>
+
+<p class=CodeCxSpMiddle>&nbsp;</p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>        public enum
+OutlookType</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>        {</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>            Sunny = 1,</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>            Rainy = 2,</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>            Cloudy = 3</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>        }</span></p>
+
+<p class=CodeCxSpMiddle>&nbsp;</p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>        public
+WeatherForecast ShadowCopy()</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>        {</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>            return new
+WeatherForecast() {</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>                Date =
+this.Date,</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>                TemperatureC
+= this.TemperatureC,</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>                Frost =
+this.Frost,</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>                Outlook =
+this.Outlook,</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>                Description =
+this.Description,</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>                Summary =
+this.Summary</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>            };</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>        }</span></p>
+
+<p class=CodeCxSpLast><span style='color:black'>    }</span></p>
+
+<h6>WeatherForecastEditor.razor</h6>
+
+<p class=MsoNormal>The cascade wires up the <i>RecordFieldChanged</i> event
+handler to each FormControl and the RecordValue on each control is bound to the
+ShadowCopy.</p>
+
+<p class=CodeCxSpFirst><span style='color:black'>&lt;EditForm
+EditContext=&quot;this.EditContext&quot;&gt;</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>    &lt;CascadingValue
+Value=&quot;@this.RecordFieldChanged&quot; Name=&quot;OnRecordChange&quot;
+TValue=&quot;Action&lt;bool&gt;&quot;&gt;</span></p>
+
+<p class=CodeCxSpMiddle>&nbsp;</p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>        &lt;div
+class=&quot;form-group row&quot;&gt;</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>            &lt;label
+class=&quot;col-4 col-form-label&quot;&gt;</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>                Record Date</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>            &lt;/label&gt;</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>            &lt;div
+class=&quot;col-4&quot;&gt;</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>               
+&lt;FormControlDate class=&quot;form-control&quot; @bind-Value=&quot;this.Record.Date&quot;
+RecordValue=&quot;this.ShadowRecord.Date&quot;&gt;&lt;/FormControlDate&gt;</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>            &lt;/div&gt;</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>        &lt;/div&gt;</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>        &lt;div
+class=&quot;form-group row&quot;&gt;</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>            &lt;label
+class=&quot;col-4 col-form-label&quot;&gt;</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>                Temperature
+&amp;deg; C</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>            &lt;/label&gt;</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>            &lt;div
+class=&quot;col-2&quot;&gt;</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>               
+&lt;FormControlNumber class=&quot;form-control&quot; @bind-Value=&quot;this.Record.TemperatureC&quot;
+RecordValue=&quot;this.ShadowRecord.TemperatureC&quot;&gt;&lt;/FormControlNumber&gt;</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>            &lt;/div&gt;</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>            ………</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>    &lt;/CascadingValue&gt;</span></p>
+
+<p class=CodeCxSpLast><span style='color:black'>&lt;/EditForm&gt;</span></p>
+
+<h6>WeatherForecastEditor.razor.cs</h6>
+
+<p class=MsoNormal>This is spartan as all the code is implemented in
+EditComponentBase.cs – see below.  We just set record specific values – in this
+case the alert message strings.</p>
+
+<p class=CodeCxSpFirst><span style='color:black'>    /// &lt;summary&gt;</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>    /// Editor for Weather
+Forecast</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>    /// All of the code is in
+the boiler plate EditComponentBase class</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>    /// &lt;/summary&gt;</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>    public partial class
+WeatherForecastEditor : EditorComponentBase&lt;WeatherForecast&gt;</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>    {</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>        protected override
+string DirtyMessage =&gt; &quot;The Weather has changed!&quot;;</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>        protected override
+string SavedMessage =&gt; &quot;The Weather has been saved&quot;;</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>    }</span></p>
+
+<p class=CodeCxSpLast>&nbsp;</p>
+
+<h6>EditComponentBase.cs</h6>
+
+<p class=MsoNormal>This is the boilerplate record editor component.</p>
+
+<p class=MsoNormal>The RecordFieldChanged event handler sets the IsClean
+property based on the Modified State of the EditContext (as returned by the event).
+</p>
+
+<p class=CodeCxSpFirst><span style='color:black'>        protected virtual
+void RecordFieldChanged(bool changeState)</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>        {</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>            if
+(this.EditContext != null)</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>            {</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>               
+this.ExitAttempt = false;</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>                this.IsClean
+= !changeState;</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>               
+this.CheckClean();</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>            }</span></p>
+
+<p class=CodeCxSpLast><span style='color:black'>        }</span></p>
+
+<p class=MsoNormal>CheckClean sorts out the Alert and turns the PageExit dialog
+on or off (see the CEC.Routing for detail on this).</p>
+
+<p class=CodeCxSpFirst><span style='color:black'>    </span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>    protected void
+CheckClean(bool setclean = false)</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>        {</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>            if (setclean)
+this.IsClean = true;</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>            if (this.IsClean)</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>            {</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>               
+this.Alert.ClearAlert();</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>               
+this.RouterSessionService.SetPageExitCheck(false);</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>            }</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>            else</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>            {</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>               
+this.RouterSessionService.SetPageExitCheck(true);</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>               
+this.Alert.SetAlert(this.DirtyMessage, Alert.AlertWarning);</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>            }</span></p>
+
+<p class=CodeCxSpLast><span style='color:black'>        }</span></p>
+
+<p class=MsoNormal>Save checks the EditContext validation, saves the record (in
+this case simply updating the ShadowCopy), sets the EditContext to clean, calls
+CheckClean to clean up the PageExit and alert, and finally sets the saved custom
+alert message.  </p>
+
+<p class=CodeCxSpFirst><span style='color:black'>        protected virtual
+void Save()</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>        {</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>            if
+(this.EditContext.Validate())</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>            {</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>               
+this.ShadowRecord = this.Record.ShadowCopy();</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>                this.EditContext.MarkAsUnmodified();</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>               
+this.CheckClean(true);</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>               
+this.Alert.SetAlert(this.SavedMessage, Alert.AlertSuccess);</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>               
+InvokeAsync(this.StateHasChanged);</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>            }</span></p>
+
+<p class=CodeCxSpMiddle><span style='color:black'>            else
+this.Alert.SetAlert(&quot;A validation error occurred.  Check individual fields
+for the relevant error.&quot;, Alert.AlertDanger);</span></p>
+
+<p class=CodeCxSpLast><span style='color:black'>        }</span></p>
+
+<h2>Setting up CEC.FormControls</h2>
+
+<p class=MsoNormal>Install the <b>CEC.FormControls</b> Nuget package.</p>
+
+<h6><a name="_Hlk44686683">_Imports.razor</a></h6>
+
+<p class=MsoNormal>Add the following namespace reference.</p>
+
+<p class=CodeCxSpFirst>&nbsp;</p>
+
+<p class=CodeCxSpLast><span style='color:black'>@using CEC.FormControls.Components.FormControls</span></p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+</div>
+
+</body>
+
+</html>

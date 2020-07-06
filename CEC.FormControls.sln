@@ -7,7 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CEC.FormControls", "CEC.For
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4180C866-8025-4604-AB9D-F128C8CEC1D7}"
 	ProjectSection(SolutionItems) = preProject
-		ReadMe.md = ReadMe.md
+		Readme.md = Readme.md
+		updatehistory.md = updatehistory.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CEC.FormControlsSample", "CEC.FormControlsSample\CEC.FormControlsSample.csproj", "{45E5885F-703B-4E10-BAF6-DA1CF3BA828A}"
