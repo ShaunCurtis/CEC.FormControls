@@ -4,17 +4,18 @@
 The CEC.FormControls library provides a set of enhanced input controls based on the Blazor standard form controls.
 
 The standard form controls based on InputBase<$T>$ don’t track changes against an existing record such as a model class.  
-The controls compare the entered value against the value stored in the control.  If its different, they update the stored value and notify the EditContext.  
-All good so far, but what happens when you change the value again.  
-At this point the control only knows what the last entered value was, not the value in the data store.  
-You could change it back to the original and the EditContext would still report the form as modified.
-Not a problem, better safe than sorry, but annoying in the UI.
+Every time you change a value, the controls compare the entered value against the control value, and update the modified 
+state on the EditContext.  Great, but what happens when you edit a value twice.  The control only knows what the last 
+entered value, it’s lost track of the original value. Change the value back to its original and the EditContext still 
+reports the value and form as modified.  If you’re implemented some form of exit control on the form, a real pain to 
+demand a save or save without exit when nothing has changed.
 
-This article details a better way.
+This article shows one way of overcoming this issue.
 
 ### Library Repository and Example
 
-**CEC.FormControls** is an implementation of the standard Blazor Form Controls with functionality to check the current user entered value against the data store value.  
+**CEC.FormControls** is an implementation of the standard Blazor Form Controls with the functionality needed to track 
+the current value against the stored value.  
 
 The source code is available at [https://github.com/ShaunCurtis/CEC.FormControls](https://github.com/ShaunCurtis/CEC.FormControls).
 
@@ -24,7 +25,9 @@ All the source code is available under the MIT license.
 
 ### InputBase<$T>$
 
-All the input controls inherit from InputBase<$T>$.   Diving into the code, the key section is the Property CurrentValue.  It’s here that the stored value is set to the current value and the IsModified decision made.  The property looks like this, unfortunately it protected and can’t be overridden.
+All the input controls inherit from InputBase<$T>$.   Dive into the code, and you wil find the value checking code resides in 
+the Property CurrentValue.  It checks the entered value against the stored value notifies the EditContext 
+accordingly.  The property looks like this:
 
 ```
 /// <summary>
@@ -46,9 +49,12 @@ protected TValue CurrentValue
     }
 }
 ```
+As you can see it’s protected, so can’t be overridden.  We need a new InputBase.
+
 ### Rebuild InputBase<$T>$
 
-To make any future upgrades as simple as possible, the abstract InputBase<$T>$ is replicated with one change:
+To simplify any future upgrades or InputBase<$T>$ changes, the abstract InputBase<$T>$ is replicated with one change. 
+ The CurrentValue property is declared virtual.
 
 ```
 Protected virtual TValue CurrentValue
@@ -61,7 +67,10 @@ The new control is named **_FormControlBase<$TValue>$._**
 
 ##### New abstract class **_FormRecordControlBase<$TValue>$_**
 
-A new abstract class FormRecordContralBase is added to implement the extra functionality.
+We build the new functionality into a new abstract class FormRecordContralBase.  This will be the new base calls 
+for our revamped controls.
+
+The changes:
 
 Two parameters:
 
@@ -69,8 +78,8 @@ Two parameters:
 
 2. _Locked_ - I use to change the look of certain custom form controls.
 ````
-        [Parameter]public TValue RecordValue { get; set; }
-        [Parameter]public bool Locked { get; set; }
+[Parameter]public TValue RecordValue { get; set; }
+[Parameter]public bool Locked { get; set; }
 ````
 Two events:
 
@@ -78,15 +87,16 @@ Two events:
 
 2. _OnRecordChange_ – a cascaded Action from the parent component – more later.
 ````
-        [Parameter] public EventCallback<bool> ChangedFromRecord { get; set; }
-
-        [CascadingParameter(Name = "OnRecordChange")] protected Action<bool> OnRecordChange { get; set; }
+[Parameter] public EventCallback<bool> ChangedFromRecord { get; set; }
+[CascadingParameter(Name = "OnRecordChange")] protected Action<bool> OnRecordChange { get; set; }
 ````
 A private property - __UseRecordValue_ – that tests if _RecordValue_ checking is required.
 ````
         private bool _UseRecordValue => RecordValue != null;
 ````
-Override _CurrentValue_ setter.  The method now checks the new value against the RecordValue if one exists and sets the Field as unmodified in the EditContext.  Otherwise is acts just like the original.  It kicks off the two new events passing the IsModified status.
+Override the CurrentValue setter.  The method checks the new value against the RecordValue if one exists 
+and sets the Field as unmodified in the EditContext.  Otherwise is replicates the original.  It kicks 
+off the two new events passing the EditContext IsModified status.
 ````
         private bool _UseRecordValue => RecordValue != null;
 
@@ -131,7 +141,8 @@ There’s an example project with **CEC.FormControls**.  There are few things to n
 
 ##### WeatherForecast.cs
 
-The WeatherForecast class implements a ShadowCopy of the original record (part of the IDbRecord interface).  This is a deep copy of the record class, and is only updated against the record when the record is saved.  The RecordValue of the control instance is linked to this.
+The WeatherForecast class implements a ShadowCopy of the original record (part of the IDbRecord interface).  This is a deep copy of the record class, that 
+is only updated against the record on a successful save event.  The RecordValue of the control instance is linked to this.
 ````
     public class WeatherForecast : IDbRecord$<$WeatherForecast$>$
     {
@@ -171,7 +182,7 @@ The WeatherForecast class implements a ShadowCopy of the original record (part o
 ````
 ###### WeatherForecastEditor.razor
 
-The cascade wires up the _RecordFieldChanged_ event handler to each FormControl and the RecordValue on each control is bound to the ShadowCopy.
+The cascaded function wires up the _RecordFieldChanged_ event handler to each FormControl and the RecordValue on each control is bound to the ShadowCopy.
 ````
 <EditForm EditContext="this.EditContext">
     <CascadingValue Value="@this.RecordFieldChanged" Name="OnRecordChange" TValue="Action<bool>">
@@ -196,7 +207,7 @@ The cascade wires up the _RecordFieldChanged_ event handler to each FormControl 
 ````
 ###### WeatherForecastEditor.razor.cs
 
-This is spartan as all the code is implemented in EditComponentBase.cs – see below.  We just set record specific values – in this case the alert message strings.
+This is spartan - all the code is implemented in EditComponentBase.cs – see below.  We just set record specific values – in this case the alert message strings.
 ````
     /// <summary>
     /// Editor for Weather Forecast
@@ -212,7 +223,7 @@ This is spartan as all the code is implemented in EditComponentBase.cs – see bel
 
 This is the boilerplate record editor component.
 
-The RecordFieldChanged event handler sets the IsClean property based on the Modified State of the EditContext (as returned by the event).
+The RecordFieldChanged event handler sets the IsClean property based on the IsModified State of the EditContext (as returned by the event).
 ````
         protected virtual void RecordFieldChanged(bool changeState)
         {
