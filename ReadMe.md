@@ -3,7 +3,7 @@
 
 The CEC.FormControls library provides a set of enhanced input controls based on the Blazor standard form controls.
 
-The standard form controls based on InputBase<$T>$ don’t track changes against an existing record such as a model class.  
+The standard form controls based on InputBase\<T\> don’t track changes against an existing record such as a model class.  
 Every time you change a value, the controls compare the entered value against the control value, and update the modified 
 state on the EditContext.  Great, but what happens when you edit a value twice.  The control only knows what the last 
 entered value, it’s lost track of the original value. Change the value back to its original and the EditContext still 
@@ -23,9 +23,9 @@ The NuGet package name is CEC.FormControls.
 
 All the source code is available under the MIT license.
 
-### InputBase<$T>$
+### InputBase\<T\>
 
-All the input controls inherit from InputBase<$T>$.   Dive into the code, and you wil find the value checking code resides in 
+All the input controls inherit from InputBase\<T\>.   Dive into the code, and you wil find the value checking code resides in 
 the Property CurrentValue.  It checks the entered value against the stored value notifies the EditContext 
 accordingly.  The property looks like this:
 
@@ -51,9 +51,9 @@ protected TValue CurrentValue
 ```
 As you can see it’s protected, so can’t be overridden.  We need a new InputBase.
 
-### Rebuild InputBase<$T>$
+### Rebuild InputBase\<T\>
 
-To simplify any future upgrades or InputBase<$T>$ changes, the abstract InputBase<$T>$ is replicated with one change. 
+To simplify any future upgrades or InputBase\<T\> changes, the abstract InputBase\<T\> is replicated with one change. 
  The CurrentValue property is declared virtual.
 
 ```
@@ -63,9 +63,9 @@ Protected virtual TValue CurrentValue
 }
 ```
 
-The new control is named **_FormControlBase<$TValue>$._**
+The new control is named **_FormControlBase\<TValue\>._**
 
-##### New abstract class **_FormRecordControlBase<$TValue>$_**
+##### New abstract class **_FormRecordControlBase\<TValue\>_**
 
 We build the new functionality into a new abstract class FormRecordContralBase.  This will be the new base calls 
 for our revamped controls.
@@ -129,7 +129,7 @@ The final changes:
 
 1. Change the names and namespace on the copied standard controls – I’ve called them all **_FormControlxxxxxxx_**.
 
-2. Change the inheritance to **_FormRecordControlBase<$TValue>$_**
+2. Change the inheritance to **_FormRecordControlBase\<TValue\>_**
 
 ## Implementing the Controls
 
@@ -144,7 +144,7 @@ There’s an example project with **CEC.FormControls**.  There are few things to n
 The WeatherForecast class implements a ShadowCopy of the original record (part of the IDbRecord interface).  This is a deep copy of the record class, that 
 is only updated against the record on a successful save event.  The RecordValue of the control instance is linked to this.
 ````
-    public class WeatherForecast : IDbRecord$<$WeatherForecast$>$
+    public class WeatherForecast : IDbRecord\<WeatherForecast\>
     {
         public int ID { get; set; }
 
